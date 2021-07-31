@@ -51,7 +51,9 @@ if __name__ == "__main__":
                 continue
             else:
                 r_image = yolo.detect_image(image)
-                r_image.show()
+                r_img = cv2.cvtColor(np.asarray(r_image),cv2.COLOR_RGB2BGR)
+                cv2.imshow("Predict", r_img)
+                key = cv2.waitKey(0)
 
     elif mode == "video":
         capture=cv2.VideoCapture(video_path)

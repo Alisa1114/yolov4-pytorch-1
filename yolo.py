@@ -23,12 +23,12 @@ from utils.utils import (DecodeBox, letterbox_image, non_max_suppression,
 #--------------------------------------------#
 class YOLO(object):
     _defaults = {
-        "model_path"        : 'model_data/yolo4_weights.pth',
+        "model_path"        : 'logs/epoch95.pth',
         "anchors_path"      : 'model_data/yolo_anchors.txt',
-        "classes_path"      : 'model_data/coco_classes.txt',
+        "classes_path"      : 'model_data/classes.txt',
         "model_image_size"  : (416, 416, 3),
-        "confidence"        : 0.5,
-        "iou"               : 0.3,
+        "confidence"        : 0.7, #原為0.5
+        "iou"               : 0.5, #原本是0.3
         "cuda"              : True,
         #---------------------------------------------------------------------#
         #   该变量用于控制是否使用letterbox_image对输入图像进行不失真的resize，

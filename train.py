@@ -35,7 +35,7 @@ def get_lr(optimizer):
         return param_group['lr']
 
         
-def fit_one_epoch(net,yolo_loss,epoch,epoch_size,epoch_size_val,gen,genval,Epoch,cuda):
+def fit_one_epoch(net,yolo_loss,epoch,epoch_size,epoch_size_val,gen,genval,Epoch,cuda,subdivision=1):
     if Tensorboard:
         global train_tensorboard_step, val_tensorboard_step
     total_loss = 0
@@ -81,7 +81,10 @@ def fit_one_epoch(net,yolo_loss,epoch,epoch_size,epoch_size_val,gen,genval,Epoch
             #----------------------#
             loss.backward()
             optimizer.step()
-
+            #if (iteration % subdivision) | (iteration == len(gen)-1):
+            #    loss.backward()
+            #    optimizer.step()
+            
             if Tensorboard:
                 # 将loss写入tensorboard，每一步都写
                 writer.add_scalar('Train_loss', loss, train_tensorboard_step)
@@ -135,14 +138,25 @@ def fit_one_epoch(net,yolo_loss,epoch,epoch_size,epoch_size_val,gen,genval,Epoch
     print('Finish Validation')
     print('Epoch:'+ str(epoch+1) + '/' + str(Epoch))
     print('Total Loss: %.4f || Val Loss: %.4f ' % (total_loss/(epoch_size+1),val_loss/(epoch_size_val+1)))
-    print('Saving state, iter:', str(epoch+1))
-    torch.save(model.state_dict(), 'logs/Epoch%d-Total_Loss%.4f-Val_Loss%.4f.pth'%((epoch+1),total_loss/(epoch_size+1),val_loss/(epoch_size_val+1)))
-
+    #print('Saving state, iter:', str(epoch+1))
+    if (epoch+1) % 10 == 0:
+        #torch.save(model.state_dict(), 'logs/Epoch%d-Total_Loss%.4f-Val_Loss%.4f.pth'%((epoch+1),total_loss/(epoch_size+1),val_loss/(epoch_size_val+1)))
+        print('Saving state, iter: '+str(epoch+1))
+        torch.save(model.state_dict(), 'logs/epoch'+str(epoch+1)+'.pth')
+    elif ((epoch+1) <= 50) & ((epoch+1) >= 40):
+        print('Saving state, iter: '+str(epoch+1))
+        torch.save(model.state_dict(), 'logs/epoch'+str(epoch+1)+'.pth')
+    elif (epoch+1) >= 90:
+        print('Saving state, iter: '+str(epoch+1))
+        torch.save(model.state_dict(), 'logs/epoch'+str(epoch+1)+'.pth')
+        
 #----------------------------------------------------#
 #   检测精度mAP和pr曲线计算参考视频
 #   https://www.bilibili.com/video/BV1zE411u7Vw
 #----------------------------------------------------#
 if __name__ == "__main__":
+    import warnings
+    warnings.filterwarnings("ignore")
     #-------------------------------#
     #   是否使用Tensorboard
     #-------------------------------#
@@ -156,7 +170,7 @@ if __name__ == "__main__":
     #   是否对损失进行归一化，用于改变loss的大小
     #   用于决定计算最终loss是除上batch_size还是除上正样本数量
     #------------------------------------------------------#
-    normalize = False
+    normalize = True
     #-------------------------------#
     #   输入的shape大小
     #   显存比较小可以使用416x416
@@ -168,7 +182,7 @@ if __name__ == "__main__":
     #   训练前一定要修改classes_path，使其对应自己的数据集
     #----------------------------------------------------#
     anchors_path = 'model_data/yolo_anchors.txt'
-    classes_path = 'model_data/voc_classes.txt'   
+    classes_path = 'model_data/classes.txt'   
     #------------------------------------------------------#
     #   Yolov4的tricks应用
     #   mosaic 马赛克数据增强 True or False 
@@ -177,8 +191,8 @@ if __name__ == "__main__":
     #   label_smoothing 标签平滑 0.01以下一般 如0.01、0.005
     #------------------------------------------------------#
     mosaic = False
-    Cosine_lr = False
-    smoooth_label = 0
+    Cosine_lr = True
+    smoooth_label = 0.01
 
     #----------------------------------------------------#
     #   获取classes和anchor
@@ -197,7 +211,7 @@ if __name__ == "__main__":
     #------------------------------------------------------#
     #   权值文件请看README，百度网盘下载
     #------------------------------------------------------#
-    model_path = "model_data/yolo4_weights.pth"
+    model_path = "model_data/yolo4_voc_weights.pth"
     print('Loading weights into state dict...')
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model_dict = model.state_dict()
@@ -254,9 +268,11 @@ if __name__ == "__main__":
     #   Epoch总训练世代
     #   提示OOM或者显存不足请调小Batch_size
     #------------------------------------------------------#
-    if True:
+    
+    if False:
         lr              = 1e-3
         Batch_size      = 4
+        Subdivision     = 16
         Init_Epoch      = 0
         Freeze_Epoch    = 50
         
@@ -289,12 +305,13 @@ if __name__ == "__main__":
             param.requires_grad = False
 
         for epoch in range(Init_Epoch,Freeze_Epoch):
-            fit_one_epoch(net,yolo_loss,epoch,epoch_size,epoch_size_val,gen,gen_val,Freeze_Epoch,Cuda)
+            fit_one_epoch(net,yolo_loss,epoch,epoch_size,epoch_size_val,gen,gen_val,Freeze_Epoch,Cuda,Subdivision)
             lr_scheduler.step()
 
     if True:
         lr              = 1e-4
         Batch_size      = 2
+        Subdivision     = 16
         Freeze_Epoch    = 50
         Unfreeze_Epoch  = 100
 
@@ -327,5 +344,5 @@ if __name__ == "__main__":
             param.requires_grad = True
 
         for epoch in range(Freeze_Epoch,Unfreeze_Epoch):
-            fit_one_epoch(net,yolo_loss,epoch,epoch_size,epoch_size_val,gen,gen_val,Unfreeze_Epoch,Cuda)
+            fit_one_epoch(net,yolo_loss,epoch,epoch_size,epoch_size_val,gen,gen_val,Unfreeze_Epoch,Cuda,Subdivision)
             lr_scheduler.step()
