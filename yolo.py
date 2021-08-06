@@ -115,6 +115,8 @@ class YOLO(object):
     #   检测图片
     #---------------------------------------------------#
     def detect_image(self, image):
+        #為了紀錄有穿和沒穿而設的變數
+        count = np.zeros((1,2), dtype=int)
         #---------------------------------------------------------#
         #   在这里将图像转换成RGB图像，防止灰度图在预测时报错。
         #---------------------------------------------------------#
@@ -163,7 +165,7 @@ class YOLO(object):
             try:
                 batch_detections = batch_detections[0].cpu().numpy()
             except:
-                return image
+                return image, count
             
             #---------------------------------------------------------#
             #   对预测框进行得分筛选
@@ -192,7 +194,9 @@ class YOLO(object):
 
         thickness = max((np.shape(image)[0] + np.shape(image)[1]) // self.model_image_size[0], 1)
 
+        
         for i, c in enumerate(top_label):
+            count[0][c] += 1
             predicted_class = self.class_names[c]
             score = top_conf[i]
 
@@ -228,7 +232,7 @@ class YOLO(object):
                 fill=self.colors[self.class_names.index(predicted_class)])
             draw.text(text_origin, str(label,'UTF-8'), fill=(0, 0, 0), font=font)
             del draw
-        return image
+        return image, count
 
     def get_FPS(self, image, test_interval):
         # 调整图片使其符合输入要求
