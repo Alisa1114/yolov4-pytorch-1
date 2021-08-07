@@ -1,3 +1,7 @@
+# 發出警告是用mpg321
+# Quick Install Steps:
+# sudo apt-get update -y
+# sudo apt-get install -y mpg321
 scipy==1.2.1
 numpy==1.17.0
 matplotlib==3.1.2
@@ -7,3 +11,4 @@ torchvision==0.4.0
 tqdm==4.60.0
 Pillow==8.2.0
 h5py==2.10.0
+python-csv==0.0.13
