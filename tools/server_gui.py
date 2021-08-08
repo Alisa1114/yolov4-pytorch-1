@@ -3,32 +3,45 @@ import socket
 import threading
 import tkinter as tk
 import time
+import queue
 from PIL import Image, ImageTk
 from playsound import playsound
 
 window = tk.Tk()
-row = 1
+message_queue = queue.Queue(maxsize=10)
 
 def notify_sound():
     playsound('tools/notify.mp3')
 
 def show_message(message):
-    global row
+    global message_queue
+    temp_queue = queue.Queue(maxsize=10)
     localtime = time.localtime()
     result = time.strftime("%Y-%m-%d %I:%M:%S %p", localtime)
-    label_time = tk.Label(window, text=result, fg='#263238', font=('Arial', 12), width=30, height=2)
-    label_time.grid(column=0, row=row)
     
-    label_message = tk.Label(window, text=message, fg='#263238', font=('Arial', 12), width=35, height=2)
-    label_message.grid(column=1, row=row)
+    if message_queue.full():
+        message_queue.get()
+        message_queue.put([result, message])
+    else:
+        message_queue.put([result, message])
+        
+    index = message_queue.qsize() + 1
+    while not message_queue.empty():
+        message_list = message_queue.get()
+        temp_queue.put(message_list)
+        
+        label_time = tk.Label(window, text=message_list[0], fg='#263238', font=('Arial', 12), width=30, height=2)
+        label_time.grid(column=0, row=index)
+        
+        label_message = tk.Label(window, text=message_list[1], fg='#263238', font=('Arial', 12), width=30, height=2)
+        label_message.grid(column=1, row=index)
+        
+        index -= 1
+    message_queue, temp_queue = temp_queue, message_queue
     
     t_notify = threading.Thread(target = notify_sound)
     t_notify.start()
     
-    row += 1
-    if row > 10:
-        row = 1
-
 def server():
     # HOST = '120.126.151.182' #實驗室電腦
     # PORT = 8887
