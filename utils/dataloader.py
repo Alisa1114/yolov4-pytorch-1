@@ -79,12 +79,12 @@ class YoloDataset(Dataset):
         new_image.paste(image, (dx, dy))
         image = new_image
 
-        # 是否翻转图片
+        # 是否翻轉图片
         flip = self.rand() < .5
         if flip:
             image = image.transpose(Image.FLIP_LEFT_RIGHT)
 
-        # 色域变换
+        # 色域變换
         hue = self.rand(-hue, hue)
         sat = self.rand(1, sat) if self.rand() < .5 else 1 / self.rand(1, sat)
         val = self.rand(1, val) if self.rand() < .5 else 1 / self.rand(1, val)

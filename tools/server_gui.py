@@ -33,7 +33,7 @@ def show_message(message):
         label_time = tk.Label(window, text=message_list[0], fg='#263238', font=('Arial', 12), width=30, height=2)
         label_time.grid(column=0, row=index)
         
-        label_message = tk.Label(window, text=message_list[1], fg='#263238', font=('Arial', 12), width=30, height=2)
+        label_message = tk.Label(window, text=message_list[1], fg='#263238', font=('Arial', 12), width=45, height=2)
         label_message.grid(column=1, row=index)
         
         index -= 1
@@ -80,12 +80,12 @@ def server():
 def creat_label():
     label1 = tk.Label(window, text='日期與時間', bg='yellow', fg='#263238', font=('Arial', 12), width=30, height=2)
     label1.grid(column=0, row=0)
-    label2 = tk.Label(window, text='地址', bg='orange', fg='#263238', font=('Arial', 12), width=35, height=2)
+    label2 = tk.Label(window, text='地址', bg='orange', fg='#263238', font=('Arial', 12), width=45, height=2)
     label2.grid(column=1, row=0)
 
 if __name__=='__main__':
-    window.title('Window')
-    window.geometry('980x710')
+    window.title('Server')
+    window.geometry('1130x710')
     creat_label()
     t_server = threading.Thread(target = server)
     t_server.daemon = True
