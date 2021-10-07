@@ -42,8 +42,19 @@ if __name__ == "__main__":
         5、如果想要在预测图上写额外的字，比如检测到的特定目标的数量，可以进入yolo.detect_image函数，在绘图部分对predicted_class进行判断，
         比如判断if predicted_class == 'car': 即可判断当前目标是否为车，然后记录数量即可。利用draw.text即可写字。
         '''
+        # for i in range(40):
+            # image = Image.open('report/img'+str(i+1)+'.jpg')
+            # r_image, count = yolo.detect_image(image)
+            # r_img = cv2.cvtColor(np.asarray(r_image),cv2.COLOR_RGB2BGR)
+            # cv2.imwrite('report/predict'+str(i+1)+'.jpg', r_img)
+            # cv2.imshow("Predict", r_img)
+            # cv2.waitKey(0)
+            # cv2.destroyAllWindows()
+        
         while True:
             img = input('Input image filename:')
+            if img == 'end':
+                break
             try:
                 image = Image.open(img)
             except:
@@ -51,7 +62,6 @@ if __name__ == "__main__":
                 continue
             else:
                 r_image, count = yolo.detect_image(image)
-                #print(count)
                 r_img = cv2.cvtColor(np.asarray(r_image),cv2.COLOR_RGB2BGR)
                 cv2.imshow("Predict", r_img)
                 cv2.waitKey(0)

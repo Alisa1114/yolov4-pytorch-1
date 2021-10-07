@@ -23,7 +23,7 @@ from utils.utils import (DecodeBox, letterbox_image, non_max_suppression,
 #--------------------------------------------#
 class YOLO(object):
     _defaults = {
-        "model_path"        : 'logs/epoch95.pth',
+        "model_path"        : 'logs/final.pth',
         "anchors_path"      : 'model_data/yolo_anchors.txt',
         "classes_path"      : 'model_data/classes.txt',
         "model_image_size"  : (416, 416, 3),
